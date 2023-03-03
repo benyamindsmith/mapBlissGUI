@@ -30,10 +30,15 @@ ui <- fluidPage(
                         fluidRow(
                           column(
                             2,
-                            textInput("cityView","Type City Name")
+                            textInput("cityView","Type City Name"),
+                            selectInput("cityTheme",
+                                        "Choose Theme",
+                                        choices = c("OpenStreetMap",
+                                                    "Watercolors"),
+                                        selected = "OpenStreetMap")
                             ),
                         column(10, 
-                               actionButton("plotCityView","Plot Flight Route"),
+                               actionButton("plotCityView","Plot City View"),
                                br(),
                                br(),
                                leafletOutput("cityViewPlot"))
@@ -72,8 +77,14 @@ server <- function(input, output, session) {
   
   
   observeEvent(input$plotCityView,{
+    
+    cityView<- input$cityView
+    theme <- switch(input$cityTheme,
+                    "OpenStreetMap" = "//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                    "Watercolors" = "https://stamen-tiles.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.jpg")
     output$cityViewPlot <- renderLeaflet({
-      mapBliss::plot_city_view(input$cityView)
+      mapBliss::plot_city_view(cityView,
+                               mapBoxTemplate = theme)
     })
   })
 }
